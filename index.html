@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Yeda LMS — Client Integration Guide</title>
+<meta name="description" content="Practical, task-oriented guide for partners and integrators connecting to Yeda LMS.">
+<link rel="icon" type="image/png" href="assets/yeda-logo-blue.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism.min.css" rel="stylesheet">
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --navy:#000F61;
+  --blue:#0A59EB;
+  --blue-soft:#C4D8FD;
+  --blue-pale:#E8F0FE;
+  --blue-bg:#F6F9FF;
+  --text:#1B1B1E;
+  --text-mid:#4A5578;
+  --text-light:#8D96B2;
+  --border:#E6ECF7;
+  --code-bg:#F6F9FF;
+  --r:12px;
+  --rs:8px;
+  --ease:cubic-bezier(.25,.46,.45,.94);
+}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  font-family:'Rubik',-apple-system,BlinkMacSystemFont,sans-serif;
+  background:#fff;
+  color:var(--text);
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+
+/* Top bar */
+.top{
+  position:sticky;top:0;z-index:100;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(20px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  padding:14px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.top-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
+.top-brand img{height:28px;width:auto;display:block}
+.top-brand .sep{width:1px;height:20px;background:var(--border)}
+.top-brand .label{font-size:.8rem;font-weight:600;color:var(--text-mid);letter-spacing:.02em}
+.top-meta{font-size:.78rem;color:var(--text-light);font-weight:500}
+
+/* Layout */
+.wrap{display:grid;grid-template-columns:280px 1fr;max-width:1280px;margin:0 auto;gap:48px;padding:0 32px}
+@media(max-width:900px){
+  .wrap{grid-template-columns:1fr;padding:0 20px;gap:20px}
+  .sidebar{display:none}
+}
+
+/* Sidebar TOC */
+.sidebar{
+  position:sticky;top:76px;
+  align-self:start;
+  max-height:calc(100vh - 96px);
+  overflow-y:auto;
+  padding:40px 0 40px;
+  font-size:.84rem;
+  scrollbar-width:thin;
+  scrollbar-color:var(--blue-soft) transparent;
+}
+.sidebar::-webkit-scrollbar{width:5px}
+.sidebar::-webkit-scrollbar-thumb{background:var(--blue-soft);border-radius:3px}
+.sidebar::-webkit-scrollbar-track{background:transparent}
+.sidebar h5{
+  font-size:.68rem;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--text-light);
+  font-weight:700;
+  margin-bottom:14px;
+  padding-left:12px;
+}
+.sidebar a{
+  display:block;
+  padding:6px 12px;
+  color:var(--text-mid);
+  text-decoration:none;
+  border-left:2px solid transparent;
+  transition:all .2s var(--ease);
+  line-height:1.45;
+}
+.sidebar a:hover{color:var(--navy);background:var(--blue-bg);border-left-color:var(--blue-soft)}
+.sidebar a.active{color:var(--navy);border-left-color:var(--navy);font-weight:600;background:var(--blue-bg)}
+.sidebar .lvl-2{font-weight:700;color:var(--navy);margin-top:14px;padding-left:12px}
+.sidebar .lvl-3{padding-left:24px}
+.sidebar .lvl-4{padding-left:36px;font-size:.78rem;color:var(--text-light)}
+
+/* Main content */
+main{padding:40px 0 80px;min-width:0}
+.hero{padding:30px 0 50px;border-bottom:1px solid var(--border);margin-bottom:50px}
+.hero h1{
+  font-size:clamp(2rem,4.2vw,2.8rem);
+  font-weight:800;
+  color:var(--navy);
+  line-height:1.15;
+  letter-spacing:-.02em;
+  margin-bottom:16px;
+}
+.hero .lead{
+  font-size:1.08rem;
+  color:var(--text-mid);
+  max-width:680px;
+  font-weight:400;
+  line-height:1.7;
+}
+.hero .meta{
+  display:inline-flex;gap:10px;align-items:center;
+  margin-top:22px;
+  padding:6px 14px;
+  background:var(--blue-bg);
+  border:1px solid var(--border);
+  border-radius:50px;
+  font-size:.78rem;
+  color:var(--text-mid);
+}
+.hero .meta b{color:var(--navy);font-weight:700}
+
+/* Intro block */
+.intro-block{
+  background:var(--blue-bg);
+  border:1px solid var(--border);
+  border-radius:var(--r);
+  padding:28px 32px;
+  margin-bottom:50px;
+}
+.intro-block p{font-size:.98rem;color:var(--text);margin-bottom:14px}
+.intro-block p:last-child{margin-bottom:0}
+.intro-block ol{padding-left:20px;margin-top:10px}
+.intro-block li{margin-bottom:8px;color:var(--text)}
+.intro-block li strong{color:var(--navy);font-weight:700}
+
+/* Typography */
+main h2{
+  font-size:1.7rem;
+  font-weight:800;
+  color:var(--navy);
+  letter-spacing:-.015em;
+  margin:72px 0 20px;
+  padding-top:24px;
+  border-top:1px solid var(--border);
+  scroll-margin-top:80px;
+}
+main h2:first-of-type{margin-top:0;border-top:none;padding-top:0}
+main h3{
+  font-size:1.22rem;
+  font-weight:700;
+  color:var(--navy);
+  margin:40px 0 14px;
+  letter-spacing:-.01em;
+  scroll-margin-top:80px;
+}
+main h4{
+  font-size:.98rem;
+  font-weight:700;
+  color:var(--navy);
+  margin:28px 0 10px;
+  scroll-margin-top:80px;
+}
+main p{margin-bottom:14px;color:var(--text);font-size:.95rem}
+main ul,main ol{padding-left:22px;margin-bottom:16px}
+main li{margin-bottom:6px;color:var(--text);font-size:.95rem}
+main a{color:var(--blue);text-decoration:none;border-bottom:1px solid transparent;transition:border-color .2s}
+main a:hover{border-bottom-color:var(--blue)}
+main strong{color:var(--navy);font-weight:700}
+
+/* Tables */
+main table{
+  width:100%;
+  border-collapse:collapse;
+  margin:18px 0 24px;
+  font-size:.88rem;
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  overflow:hidden;
+}
+main thead th{
+  background:var(--blue-bg);
+  color:var(--navy);
+  font-weight:700;
+  padding:11px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  font-size:.82rem;
+}
+main tbody td{
+  padding:11px 14px;
+  border-bottom:1px solid var(--border);
+  vertical-align:top;
+  color:var(--text);
+}
+main tbody tr:last-child td{border-bottom:none}
+main tbody tr:hover td{background:#FAFCFF}
+
+/* Inline code */
+main code{
+  font-family:'JetBrains Mono',Menlo,Consolas,monospace;
+  font-size:.84em;
+  background:var(--blue-bg);
+  color:var(--navy);
+  padding:2px 6px;
+  border-radius:4px;
+  border:1px solid var(--border);
+  font-weight:500;
+}
+main table code{font-size:.82em;padding:1px 5px}
+
+/* Code blocks */
+main pre{
+  background:var(--code-bg);
+  border:1px solid var(--border);
+  border-radius:var(--rs);
+  padding:18px 20px;
+  overflow-x:auto;
+  font-size:.85rem;
+  line-height:1.6;
+  margin:14px 0 24px;
+  position:relative;
+}
+main pre code{
+  background:none;
+  border:none;
+  padding:0;
+  font-weight:400;
+  color:var(--text);
+  font-size:inherit;
+}
+
+/* HTTP method chip */
+.http{
+  display:inline-block;
+  padding:1px 8px;
+  border-radius:4px;
+  font-family:'JetBrains Mono',Menlo,Consolas,monospace;
+  font-size:.72em;
+  font-weight:700;
+  letter-spacing:.02em;
+  margin-right:4px;
+  vertical-align:1px;
+}
+.http.get{background:#E6F4EA;color:#137333}
+.http.post{background:#E8F0FE;color:#1967D2}
+.http.put{background:#FCE8E6;color:#C5221F}
+.http.patch{background:#FEF7E0;color:#946800}
+.http.delete{background:#FCE8E6;color:#D93025}
+.http.any{background:#F1F3F4;color:#5F6368}
+
+/* Callout */
+.callout{
+  background:var(--blue-bg);
+  border-left:3px solid var(--blue);
+  border-radius:0 var(--rs) var(--rs) 0;
+  padding:16px 20px;
+  margin:18px 0 24px;
+  font-size:.92rem;
+}
+.callout p:last-child{margin-bottom:0}
+.callout.warn{border-left-color:#F5A623;background:#FFFBF0}
+.callout.warn strong{color:#8A5C00}
+
+/* Footer */
+footer{
+  border-top:1px solid var(--border);
+  padding:40px 32px;
+  text-align:center;
+  color:var(--text-light);
+  font-size:.84rem;
+  margin-top:60px;
+}
+footer b{color:var(--navy);font-weight:700}
+footer a{color:var(--blue);text-decoration:none}
+
+/* Back-to-top */
+.top-btn{
+  position:fixed;bottom:24px;right:24px;z-index:50;
+  width:42px;height:42px;
+  border-radius:50%;
+  background:var(--navy);color:#fff;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 24px rgba(0,15,97,.2);
+  opacity:0;pointer-events:none;
+  transition:.3s var(--ease);
+  font-size:18px;
+}
+.top-btn.v{opacity:1;pointer-events:auto}
+.top-btn:hover{transform:translateY(-3px);box-shadow:0 12px 32px rgba(0,15,97,.25)}
+
+/* Print */
+@media print{
+  .sidebar,.top,.top-btn{display:none}
+  .wrap{display:block;max-width:100%;padding:0}
+  main{padding:0}
+  main h2{page-break-before:auto;break-before:auto}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <a class="top-brand" href="#top">
+    <img src="assets/yeda-logo-blue.png" alt="Yeda">
+    <span class="sep"></span>
+    <span class="label">Client Integration Guide</span>
+  </a>
+  <span class="top-meta">v1.0 · 2026-04-20</span>
+</header>
+
+<div class="wrap" id="top">
+
+<!-- ══════════════════ SIDEBAR TOC ══════════════════ -->
+<aside class="sidebar">
+  <h5>On this page</h5>
+  <a href="#getting-started" class="lvl-2">1. Getting started</a>
+  <a href="#what-you-need" class="lvl-3">1.1 What you need</a>
+  <a href="#access-modes" class="lvl-3">1.2 Access modes</a>
+  <a href="#health-check" class="lvl-3">1.3 Health check</a>
+  <a href="#log-in" class="lvl-3">1.4 Log a student in</a>
+  <a href="#fetch-user" class="lvl-3">1.5 Fetch the current user</a>
+
+  <a href="#authentication" class="lvl-2">2. Authentication</a>
+  <a href="#user-tokens" class="lvl-3">2.1 User access tokens</a>
+  <a href="#college-jwt" class="lvl-3">2.2 College JWT</a>
+  <a href="#logout" class="lvl-3">2.3 Logout</a>
+
+  <a href="#conventions" class="lvl-2">3. Conventions</a>
+  <a href="#base-url" class="lvl-3">3.1 Base URL & prefix</a>
+  <a href="#college-context" class="lvl-3">3.2 College context</a>
+  <a href="#content-types" class="lvl-3">3.3 Content types</a>
+  <a href="#pagination" class="lvl-3">3.4 Pagination</a>
+  <a href="#timestamps" class="lvl-3">3.5 Timestamps</a>
+  <a href="#errors" class="lvl-3">3.6 Error model</a>
+  <a href="#rate-limits" class="lvl-3">3.7 Rate limits</a>
+  <a href="#maintenance" class="lvl-3">3.8 Maintenance mode</a>
+
+  <a href="#capabilities" class="lvl-2">4. Capabilities</a>
+  <a href="#catalogue" class="lvl-3">4.1 Browse catalogue</a>
+  <a href="#self-service" class="lvl-3">4.2 Current user</a>
+  <a href="#enrolments" class="lvl-3">4.3 Enrolments</a>
+  <a href="#learning" class="lvl-3">4.4 Learning content</a>
+  <a href="#exams" class="lvl-3">4.5 Practices & exams</a>
+  <a href="#enroll" class="lvl-3">4.6 Enroll the user</a>
+  <a href="#payments" class="lvl-3">4.7 Payments</a>
+  <a href="#teachers" class="lvl-3">4.8 Teachers & ratings</a>
+  <a href="#forums" class="lvl-3">4.9 Forums</a>
+  <a href="#certificates" class="lvl-3">4.10 Certificates</a>
+  <a href="#offline-calendar" class="lvl-3">4.11 Offline calendar</a>
+  <a href="#zoom" class="lvl-3">4.12 Zoom</a>
+  <a href="#s2s" class="lvl-3">4.13 Server-to-server</a>
+  <a href="#yedalabs" class="lvl-3">4.14 YedaLabs</a>
+  <a href="#vimeo" class="lvl-3">4.15 Vimeo</a>
+  <a href="#white-label" class="lvl-3">4.16 White-label</a>
+  <a href="#translations" class="lvl-3">4.17 Translations</a>
+  <a href="#utility" class="lvl-3">4.18 Utility</a>
+
+  <a href="#recipes" class="lvl-2">5. Integration recipes</a>
+  <a href="#recipe-1" class="lvl-3">5.1 Log in & fetch user</a>
+  <a href="#recipe-2" class="lvl-3">5.2 Landing-page sale</a>
+  <a href="#recipe-3" class="lvl-3">5.3 Grant access via JWT</a>
+  <a href="#recipe-4" class="lvl-3">5.4 Live class + Zoom</a>
+  <a href="#recipe-5" class="lvl-3">5.5 Upload video to Vimeo</a>
+  <a href="#recipe-6" class="lvl-3">5.6 Directory sync</a>
+  <a href="#recipe-7" class="lvl-3">5.7 User progress</a>
+
+  <a href="#webhooks" class="lvl-2">6. Webhooks</a>
+  <a href="#wh-tranzila" class="lvl-3">6.1 Tranzila</a>
+  <a href="#wh-enrollment" class="lvl-3">6.2 Enrollment approval</a>
+  <a href="#wh-others" class="lvl-3">6.3 Stripe / Cardcom / …</a>
+
+  <a href="#glossary" class="lvl-2">7. Glossary</a>
+  <a href="#help" class="lvl-2">Need help?</a>
+</aside>
+
+<!-- ══════════════════ MAIN ══════════════════ -->
+<main>
+
+<section class="hero">
+  <h1>Yeda LMS — Client Integration Guide</h1>
+  <p class="lead">A practical, task-oriented guide for partners and integrators who want to connect their product to Yeda LMS.</p>
+  <span class="meta"><b>v1.0</b> · Last updated 2026-04-20</span>
+</section>
+
+<div class="intro-block">
+  <p>This document answers two questions:</p>
+  <ol>
+    <li><strong>What can I do through the Yeda API?</strong> — concrete capabilities you can build on top of.</li>
+    <li><strong>How do I get started?</strong> — connection steps, authentication, first calls, and copy-paste examples.</li>
+  </ol>
+</div>
+
+<!-- ══ 1. GETTING STARTED ══ -->
+<h2 id="getting-started">1. Getting started</h2>
+
+<h3 id="what-you-need">1.1 What you need from Yeda</h3>
+<p>Before writing any code, request the following from your Yeda account manager:</p>
+<table>
+  <thead><tr><th style="width:45%">Item</th><th>Required for</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Base API URL</strong> for your college</td><td>All requests (<code>https://&lt;college-domain&gt;/api</code>)</td></tr>
+    <tr><td><strong><code>college_id</code> and <code>current_college_id</code></strong></td><td>Every login / registration call</td></tr>
+    <tr><td><strong>Admin or super-admin username + password</strong> <em>(for server-to-server integrations only)</em></td><td>Admin-authenticated flows and College JWT issuance</td></tr>
+    <tr><td><strong>Terminal / merchant configuration</strong> <em>(optional — if you process payments)</em></td><td>Tranzila or Cardcom integration</td></tr>
+    <tr><td><strong>Vimeo OAuth credentials</strong> <em>(optional — for custom video hosting)</em></td><td>Vimeo integration</td></tr>
+  </tbody>
+</table>
+
+<h3 id="access-modes">1.2 Access modes and authentication</h3>
+<p>Pick the one that matches your use-case:</p>
+<table>
+  <thead><tr><th style="width:45%">Scenario</th><th>Auth method</th></tr></thead>
+  <tbody>
+    <tr><td>Mobile / web app acting on behalf of a logged-in student</td><td><strong>User access token</strong> (<code>POST /api/auth/login</code>)</td></tr>
+    <tr><td>Admin integration endpoints that explicitly support College JWT</td><td><strong>College JWT</strong> (<code>POST /api/auth/colleges/{college}/jwt/byAdmin</code>)</td></tr>
+    <tr><td>White-label website or portal flows</td><td><code>/api/wl/*</code> endpoints; some are public, protected ones use the same user Bearer token</td></tr>
+  </tbody>
+</table>
+<p>Details of each are in <a href="#authentication">§2</a>.</p>
+
+<h3 id="health-check">1.3 First call: health check</h3>
+<p>Verify you can reach the API:</p>
+<pre><code class="language-bash">curl -s https://your-college.yeda.ai/api/health
+# → {"status":"ok"}</code></pre>
+
+<h3 id="log-in">1.4 Second call: log a student in</h3>
+<pre><code class="language-bash">curl -s https://your-college.yeda.ai/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fieldname":  "email",
+    "username":   "student@example.com",
+    "password":   "…",
+    "college_id": 40
+  }'</code></pre>
+<p>Successful response returns <code>auth.access_token</code>, <code>auth.expires_at</code>, <code>user</code>, and <code>isDocumentChecked</code>. Use <code>auth.access_token</code> as a Bearer token for protected calls.</p>
+
+<h3 id="fetch-user">1.5 Third call: fetch the current user</h3>
+<pre><code class="language-bash">curl -s https://&lt;college-domain&gt;/api/current-user \
+  -H 'Accept: application/json' \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'</code></pre>
+
+<!-- ══ 2. AUTHENTICATION ══ -->
+<h2 id="authentication">2. Authentication</h2>
+
+<h3 id="user-tokens">2.1 User access tokens</h3>
+<p>Yeda issues <strong>OAuth2 personal access tokens</strong> (Laravel Passport). Present them as:</p>
+<pre><code>Authorization: Bearer &lt;access_token&gt;</code></pre>
+<table>
+  <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td>Access token lifetime</td><td>15 days</td></tr>
+  </tbody>
+</table>
+
+<h4>Log in</h4>
+<pre><code class="language-http">POST /api/auth/login
+Content-Type: application/json
+
+{
+  "fieldname":          "email",          // or "username"
+  "username":           "student@ex.com",
+  "password":           "…",
+  "college_id":         40,
+  "current_college_id": 40
+}</code></pre>
+
+<p>Response (<code>AuthResource</code>):</p>
+<pre><code class="language-json">{
+  "auth": {
+    "access_token":   "eyJ0eXAiOiJKV1Qi…",
+    "firebase_token": "eyJhbGciOi…",
+    "expires_at":     "2026-05-05 14:30:00",
+    "suspended":      0
+  },
+  "user":              { /* current user — see §4.2 */ },
+  "isDocumentChecked": 1
+}</code></pre>
+
+<h4>Alternative login flows</h4>
+<table>
+  <thead><tr><th>Endpoint</th><th>Use-case</th></tr></thead>
+  <tbody>
+    <tr><td><span class="http post">POST</span><code>/api/auth/login-by-email</code></td><td>Login with an explicit <code>email</code> field</td></tr>
+    <tr><td><span class="http post">POST</span><code>/api/auth/auto-login</code></td><td>Exchange a stored refresh token for a fresh access token</td></tr>
+    <tr><td><span class="http post">POST</span><code>/api/auth/firebase</code></td><td>Sign in with a Firebase ID token (iOS / Android social sign-in)</td></tr>
+    <tr><td><span class="http post">POST</span><code>/api/auth/google</code></td><td>Sign in with a Google OAuth access token</td></tr>
+    <tr><td><span class="http post">POST</span><code>/api/sign-in-via-phone-number/request</code> → <code>…/sign-in</code></td><td>SMS-based registration and login</td></tr>
+  </tbody>
+</table>
+
+<h4>Register</h4>
+<pre><code class="language-http">POST /api/auth/register
+Content-Type: application/json
+
+{
+  "college_id": 40,
+  "email":      "new@example.com",
+  "phone":      "+972501234567",   // optional, Israeli E.164
+  "password":   "verys3cret!"
+}</code></pre>
+
+<h4>Forgot / reset password</h4>
+<pre><code class="language-http">POST /api/auth/forgot            # request reset email
+POST /api/website/auth/reset     # complete reset
+#   body: token, email, college_id, password, password_confirmation</code></pre>
+
+<h4>Verify email / phone</h4>
+<div class="callout warn">
+  <p><strong>⚠ All four endpoints below require a valid user access token</strong> (<code>Authorization: Bearer &lt;access_token&gt;</code> — i.e. the <code>auth:api</code> middleware). The user must already be logged in.</p>
+</div>
+<p>After registration, Yeda may require verification before allowing further actions:</p>
+<pre><code class="language-http">POST /api/auth/email-verification/send-code
+POST /api/auth/email-verification/check-code   { "email_verification_code": 1234 }
+GET  /api/auth/user/send-sms-code
+POST /api/auth/user/check-sms-code             { "sms_code": "1234" }</code></pre>
+
+<h3 id="college-jwt">2.2 College JWT (server-to-server)</h3>
+<p>For back-office automation that acts on behalf of your organisation (rather than a logged-in user), obtain a short-lived JWT:</p>
+<pre><code class="language-http">POST /api/auth/colleges/{college}/jwt/byAdmin
+Content-Type: application/json
+
+{ "login": "admin@your-college.co.il", "password": "…" }</code></pre>
+<pre><code class="language-json">{ "token": "eyJhbGciOi…" }</code></pre>
+<div class="callout">
+  <p>Use this token like a Bearer access token (<code>Authorization: Bearer &lt;jwt&gt;</code>), <strong>but only on endpoints that support the <code>college-jwt-or-api</code> middleware</strong> — not on all API routes. Endpoints that accept the College JWT are listed in <a href="#s2s">§4.13</a>. On other endpoints the JWT will be rejected — those require a regular user access token from §2.1.</p>
+</div>
+
+<h3 id="logout">2.3 Logout</h3>
+<p>Discard the token client-side, and optionally call:</p>
+<pre><code class="language-http">POST /api/user-devices/{deviceId}/close</code></pre>
+<p>to terminate the device session server-side.</p>
+
+<!-- ══ 3. CONVENTIONS ══ -->
+<h2 id="conventions">3. Conventions</h2>
+
+<h3 id="base-url">3.1 Base URL and prefix</h3>
+<p>All endpoints live under <code>/api</code> on your college domain:</p>
+<pre><code>https://your-college.yeda.ai/api/...</code></pre>
+
+<h3 id="college-context">3.2 College context</h3>
+<p>Yeda is multi-tenant. Nearly every endpoint expects <code>current_college_id</code> as a query-string or body parameter. Always include it.</p>
+
+<h3 id="content-types">3.3 Content types</h3>
+<ul>
+  <li><strong>Requests:</strong> <code>application/json</code> — except file uploads, which use <code>multipart/form-data</code>.</li>
+  <li><strong>Responses:</strong> <code>application/json</code> — except binary downloads (PDF, XLSX, streamed files) and XML sitemaps.</li>
+</ul>
+
+<h3 id="pagination">3.4 Pagination</h3>
+<p>List endpoints return a Laravel pagination envelope:</p>
+<pre><code class="language-json">{
+  "data": [ /* items */ ],
+  "meta": { "total": 421, "per_page": 15, "current_page": 1, "total_pages": 29 }
+}</code></pre>
+<p>A few category endpoints use <strong>cursor pagination</strong> and return a <code>next_cursor</code> field instead.</p>
+
+<h3 id="timestamps">3.5 Timestamps</h3>
+<p>ISO-8601 UTC (<code>2026-04-20T14:30:00Z</code>). Fields ending in <code>_date</code> are date-only (<code>YYYY-MM-DD</code>); fields ending in <code>_time</code> are time-only (<code>HH:MM</code>).</p>
+
+<h3 id="errors">3.6 Error model</h3>
+<p>Laravel's standard envelope:</p>
+<pre><code class="language-http">HTTP/1.1 422 Unprocessable Entity
+Content-Type: application/json
+
+{
+  "message": "The given data was invalid.",
+  "errors":  { "email": [ "The email field is required." ] }
+}</code></pre>
+<table>
+  <thead><tr><th style="width:22%">Status</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><code>200</code> / <code>201</code> / <code>204</code></td><td>Success</td></tr>
+    <tr><td><code>400</code></td><td>Business error (e.g., email already registered)</td></tr>
+    <tr><td><code>401</code></td><td>Missing / invalid / expired token</td></tr>
+    <tr><td><code>403</code></td><td>Authenticated but not allowed (suspended, role mismatch, pending approval)</td></tr>
+    <tr><td><code>404</code></td><td>Resource not found</td></tr>
+    <tr><td><code>422</code></td><td>Validation error — inspect <code>errors</code> map</td></tr>
+    <tr><td><code>429</code></td><td>Rate limit exceeded</td></tr>
+  </tbody>
+</table>
+<p>Some endpoints use <code>{"status":"success"}</code> / <code>{"status":"error","message":"…"}</code> envelopes instead of 4xx codes. Treat them equivalently.</p>
+
+<h3 id="rate-limits">3.7 Rate limits</h3>
+<p><strong>600 requests per minute</strong> per token (or per IP for unauthenticated traffic). Beyond that, you will receive <code>429 Too Many Requests</code>.</p>
+
+<h3 id="maintenance">3.8 Maintenance mode</h3>
+<pre><code class="language-http">GET /api/maintenance-mode
+# → {"maintenance": false, "future_maintenance": "Sunday 20:00 UTC"}</code></pre>
+<p>Poll this to warn users before read-only windows.</p>
+
+<!-- ══ 4. CAPABILITIES ══ -->
+<h2 id="capabilities">4. What you can do — capabilities by use-case</h2>
+<p>Each section lists the <strong>endpoints you call</strong>, grouped by business outcome.</p>
+
+<h3 id="catalogue">4.1 Browse the catalogue (no login required)</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>List all public courses for the college</td><td><span class="http get">GET</span><code>/api/website/college/courses?college_id=…</code></td></tr>
+    <tr><td>Get one course by id / slug</td><td><span class="http get">GET</span><code>/api/website/college/course?course_id=…</code> · <code>/api/courses/{coursePointer}/about</code> · <code>/api/courses/{coursePointer}/info</code></td></tr>
+    <tr><td>Search courses</td><td><span class="http get">GET</span><code>/api/website/college/courses/search?s=…&amp;college_id=…</code></td></tr>
+    <tr><td>Search everything (courses, teachers, articles)</td><td><span class="http get">GET</span><code>/api/search-bar?q=…&amp;college_id=…</code></td></tr>
+    <tr><td>List categories</td><td><span class="http get">GET</span><code>/api/categories?current_college_id=…</code></td></tr>
+    <tr><td>Pinned categories for homepage</td><td><span class="http get">GET</span><code>/api/categories/pinned?current_college_id=…</code></td></tr>
+    <tr><td>List teachers</td><td><span class="http get">GET</span><code>/api/website/college/teachers?college_id=…</code></td></tr>
+    <tr><td>Teacher profile</td><td><span class="http get">GET</span><code>/api/website/college/teacher?teacher_id=…</code></td></tr>
+    <tr><td>A teacher's courses</td><td><span class="http get">GET</span><code>/api/website/college/teacher/courses?teacher_id=…</code></td></tr>
+    <tr><td>Bundle info</td><td><span class="http get">GET</span><code>/api/bundles/{bundlePointer}/info</code></td></tr>
+    <tr><td>Can the current user buy this course?</td><td><span class="http get">GET</span><code>/api/courses/{courseSlug}/can-pay</code></td></tr>
+    <tr><td>Has the current user got access?</td><td><span class="http get">GET</span><code>/api/courses/{course}/has-access</code></td></tr>
+    <tr><td>College subjects</td><td><span class="http get">GET</span><code>/api/website/college/subjects?college_id=…</code></td></tr>
+    <tr><td>About / Contacts page</td><td><span class="http get">GET</span><code>/api/colleges/about</code> · <code>/api/colleges/contacts</code></td></tr>
+    <tr><td>Footer links, theme colours, i18n bootstrap</td><td><span class="http get">GET</span><code>/api/colors</code> · <code>/api/all-translations</code></td></tr>
+    <tr><td>Resolve domain to <code>college_id</code></td><td><span class="http get">GET</span><code>/api/colleges/getCollegeIdByDomain?domain=…</code></td></tr>
+    <tr><td>SSR bootstrap (user + college + settings in one call)</td><td><span class="http get">GET</span><code>/api/colleges/ssr-init?domain=…</code></td></tr>
+    <tr><td>SEO metadata for any URL</td><td><span class="http get">GET</span><code>/api/simple-seo?url=…</code></td></tr>
+    <tr><td>XML sitemap</td><td><span class="http get">GET</span><code>/api/sitemaps</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="self-service">4.2 Current user self-service</h3>
+<p>All of these require a user bearer token.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Fetch the authenticated user</td><td><span class="http get">GET</span><code>/api/current-user</code></td></tr>
+    <tr><td>Update profile</td><td><span class="http post">POST</span><code>/api/website/profile/update</code></td></tr>
+    <tr><td>Change password</td><td><span class="http post">POST</span><code>/api/website/profile/change-password</code></td></tr>
+    <tr><td>Show / hide CV on public profile</td><td><span class="http post">POST</span><code>/api/website/profile/show-cv</code> · <code>/hide-cv</code></td></tr>
+    <tr><td>Change email</td><td><span class="http put">PUT</span><code>/api/me/email</code></td></tr>
+    <tr><td>Send / verify email-change code</td><td><span class="http post">POST</span><code>/api/me/send-email-verification-code</code> · <code>/api/me/verify-email-code</code></td></tr>
+    <tr><td>Upload / delete user avatar</td><td><span class="http post">POST</span><code>/api/wl/me/image</code> · <span class="http delete">DELETE</span><code>/api/wl/me/image</code></td></tr>
+    <tr><td>Upload / delete user files</td><td><span class="http post">POST</span><code>/api/wl/me/files</code> · <span class="http delete">DELETE</span><code>/api/wl/me/files</code></td></tr>
+    <tr><td>Check privacy settings</td><td><span class="http get">GET</span><code>/api/wl/me/privacy</code> · <span class="http put">PUT</span><code>/api/wl/me/privacy</code></td></tr>
+    <tr><td>List / close device sessions</td><td><span class="http get">GET</span><code>/api/user-devices/devices</code> · <span class="http post">POST</span><code>/api/user-devices/{id}/close</code></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Example — current-user response (simplified):</strong></p>
+<pre><code class="language-json">{
+  "id":                 12345,
+  "name":               "Ivan Ivanov",
+  "email":              "ivan@example.com",
+  "username":           "ivanivanov",
+  "phone":              "+972501234567",
+  "role":               "student",
+  "college_id":         40,
+  "current_college_id": 40,
+  "email_confirmed_at": "2026-03-01T08:12:55Z",
+  "is_active":          true,
+  "image_url":          "https://cdn.example.com/users/12345.jpg",
+  "locale":             "he"
+}</code></pre>
+
+<h3 id="enrolments">4.3 List the user's enrolments</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>My courses</td><td><span class="http get">GET</span><code>/api/website/college/my-courses?college_id=…</code></td></tr>
+    <tr><td>My bundles</td><td><span class="http get">GET</span><code>/api/website/college/my-bundles?college_id=…</code></td></tr>
+    <tr><td>My orders</td><td><span class="http get">GET</span><code>/api/my-orders?current_college_id=…</code></td></tr>
+    <tr><td>My subscription orders</td><td><span class="http get">GET</span><code>/api/my-orders-subscriptions?current_college_id=…</code></td></tr>
+    <tr><td>My forum threads</td><td><span class="http get">GET</span><code>/api/wl/me/threads</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="learning">4.4 Learning: consume course content</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Full course with sections & items</td><td><span class="http get">GET</span><code>/api/auth/website/college/course?course_id=…</code></td></tr>
+    <tr><td>One lesson</td><td><span class="http get">GET</span><code>/api/website/college/course/lesson?course_id=…&amp;lesson_id=…</code></td></tr>
+    <tr><td>One lesson part (video, file, etc.)</td><td><span class="http get">GET</span><code>/api/website/college/course/lesson/part?…</code></td></tr>
+    <tr><td>Is this item unlocked for me?</td><td><span class="http get">GET</span><code>/api/website/section/item/is-accessable</code></td></tr>
+    <tr><td>Mark section item as opened</td><td><span class="http post">POST</span><code>/api/website/college/course/section-item-opened/{itemId}</code></td></tr>
+    <tr><td>Save video time-point</td><td><span class="http post">POST</span><code>/api/website/video/update</code></td></tr>
+    <tr><td>Save lesson video percent progress</td><td><span class="http post">POST</span><code>/api/website/college/course/lesson/video/update</code></td></tr>
+    <tr><td>Mark video as watched</td><td><span class="http post">POST</span><code>/api/course/lesson/part/watched-video</code></td></tr>
+    <tr><td>Is the lesson finished?</td><td><span class="http get">GET</span><code>/api/courses/is-lesson-finished</code></td></tr>
+    <tr><td>Is a set of lessons finished?</td><td><span class="http get">GET</span><code>/api/courses/is-lessons-finished</code></td></tr>
+    <tr><td>"Continue where you left off" URL</td><td><span class="http get">GET</span><code>/api/courses/continue-training</code></td></tr>
+    <tr><td>Course grades</td><td><span class="http get">GET</span><code>/api/website/college/course/grades</code></td></tr>
+    <tr><td>Course announcements</td><td><span class="http get">GET</span><code>/api/website/college/course/messages</code></td></tr>
+    <tr><td>Count of unread announcements</td><td><span class="http get">GET</span><code>/api/website/college/messages/unread</code></td></tr>
+    <tr><td>Protected file download (logged-in)</td><td><span class="http get">GET</span><code>/api/website/lesson/file-show</code> · <code>/website/course/file-show</code></td></tr>
+    <tr><td>Public (preview) file download</td><td><span class="http get">GET</span><code>/api/website/lesson/file</code> · <code>/website/course/file</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="exams">4.5 Practices, exams, surveys</h3>
+<p>Same flow for all three: <strong>start → answer → close → view results</strong>.</p>
+<table>
+  <thead><tr><th>Kind</th><th>Start</th><th>Answer</th><th>Close</th><th>Results</th></tr></thead>
+  <tbody>
+    <tr><td>Practice</td><td><span class="http post">POST</span><code>/api/website/practice/start</code></td><td><span class="http post">POST</span><code>/api/website/practice/answer</code></td><td><span class="http post">POST</span><code>/api/website/course/practice/close</code></td><td><span class="http get">GET</span><code>/api/website/college/course/practice/results</code></td></tr>
+    <tr><td>Exam</td><td><span class="http post">POST</span><code>/api/website/exam/start</code></td><td><span class="http post">POST</span><code>/api/website/exam/answer</code></td><td><span class="http post">POST</span><code>/api/website/course/exam/close</code></td><td><span class="http get">GET</span><code>/api/website/college/course/exam/results</code></td></tr>
+    <tr><td>Survey</td><td><span class="http post">POST</span><code>/api/survey/start</code></td><td><span class="http post">POST</span><code>/api/survey/answer</code></td><td><span class="http post">POST</span><code>/api/survey/finish</code></td><td>(inline)</td></tr>
+  </tbody>
+</table>
+<p>Solutions for any question: <span class="http post">POST</span><code>/api/website/solution</code>.</p>
+
+<h3 id="enroll">4.6 Enroll the user</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Enroll in a free course</td><td><span class="http post">POST</span><code>/api/website/course/enroll</code></td></tr>
+    <tr><td>Request enrollment (manual approval)</td><td><span class="http post">POST</span><code>/api/website/college/course/request</code></td></tr>
+    <tr><td>Mark enrollment request as read</td><td><span class="http post">POST</span><code>/api/website/college/course/request/read</code></td></tr>
+    <tr><td>White-label one-click approval link</td><td><span class="http get">GET</span><code>/api/wl/enrollments/approve/{token}</code></td></tr>
+    <tr><td>White-label one-click decline link</td><td><span class="http get">GET</span><code>/api/wl/enrollments/decline/{token}</code></td></tr>
+    <tr><td>White-label bundle enroll</td><td><span class="http post">POST</span><code>/api/wl/colleges/{college}/bundle/{bundle}/enroll</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="payments">4.7 Payments, subscriptions, coupons</h3>
+<h4>4.7.1 Checkout</h4>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Pay for a course (logged-in user)</td><td><span class="http post">POST</span><code>/api/payments/courses/{course}</code></td></tr>
+    <tr><td>Pay for a bundle (logged-in user)</td><td><span class="http post">POST</span><code>/api/payments/bundles/{bundle}</code></td></tr>
+    <tr><td>Landing-page purchase (creates a user if missing)</td><td><span class="http post">POST</span><code>/api/lp/payments/courses/{course}</code> · <code>/api/lp/payments/bundles/{bundle}</code></td></tr>
+    <tr><td>Does this email already have an account?</td><td><span class="http get">GET</span><code>/api/lp/check/email?email=…&amp;college_id=…</code></td></tr>
+  </tbody>
+</table>
+
+<h4>4.7.2 Payment-page iframe (Tranzila)</h4>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Create or fetch an empty order</td><td><span class="http post">POST</span><code>/api/payment-page/get-empty-order</code></td></tr>
+    <tr><td>Attach user to the order</td><td><span class="http post">POST</span><code>/api/payment-page/set-user-to-order</code></td></tr>
+    <tr><td>Poll order status</td><td><span class="http get">GET</span><code>/api/payment-page/check-payment-status?order_id=…</code></td></tr>
+  </tbody>
+</table>
+
+<h4>4.7.3 Subscriptions</h4>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody><tr><td>Cancel a recurring subscription</td><td><span class="http post">POST</span><code>/api/subscriptions/deactivate</code></td></tr></tbody>
+</table>
+
+<h4>4.7.4 Coupons</h4>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Redeem an <strong>Alljobs</strong> voucher for a course</td><td><span class="http post">POST</span><code>/api/courses/{course}/activate-alljobs-coupon</code></td></tr>
+    <tr><td>Redeem a <strong>Multipass</strong> voucher</td><td><span class="http post">POST</span><code>/api/activate-multipass-coupon</code></td></tr>
+    <tr><td>Cancel the Multipass subscription linked to an order</td><td><span class="http post">POST</span><code>/api/orders/deactivate-multipass-coupon</code></td></tr>
+  </tbody>
+</table>
+
+<h4>4.7.5 Refund requests</h4>
+<p>Customers can file a refund request themselves (no login required):</p>
+<pre><code class="language-http">POST /api/orders/refund-request
+Content-Type: application/json
+
+{
+  "name":    "…",
+  "email":   "…",
+  "phone":   "…",
+  "order":   "…",
+  "message": "…"
+}</code></pre>
+
+<h3 id="teachers">4.8 Teachers &amp; ratings</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Teacher rating summary</td><td><span class="http get">GET</span><code>/api/teachers/{teacher}/ratings?current_college_id=…</code></td></tr>
+    <tr><td>Paginated teacher reviews</td><td><span class="http get">GET</span><code>/api/teachers/{teacher}/reviews?current_college_id=…</code></td></tr>
+    <tr><td>Post a review (50–400 chars)</td><td><span class="http post">POST</span><code>/api/teachers/reviews</code></td></tr>
+    <tr><td>Edit my review</td><td><span class="http put">PUT</span><code>/api/teachers/reviews/{review}</code></td></tr>
+    <tr><td>Delete my review</td><td><span class="http delete">DELETE</span><code>/api/teachers/reviews/{review}</code></td></tr>
+    <tr><td>Send a message to a teacher (CAPTCHA-protected)</td><td><span class="http post">POST</span><code>/api/website/teacher/message</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="forums">4.9 Forums</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>List threads for a course</td><td><span class="http get">GET</span><code>/api/website/college/course/forums?course_id=…</code></td></tr>
+    <tr><td>Search threads</td><td><span class="http get">GET</span><code>/api/website/college/course/forums/search?s=…</code></td></tr>
+    <tr><td>Create thread</td><td><span class="http post">POST</span><code>/api/website/forum/add</code></td></tr>
+    <tr><td>Reply to thread</td><td><span class="http post">POST</span><code>/api/website/forum/reply/add</code></td></tr>
+    <tr><td>Update thread text</td><td><span class="http put">PUT</span><code>/api/forums/threads/{thread}</code></td></tr>
+    <tr><td>Toggle thread notifications</td><td><span class="http post">POST</span><code>/api/website/forum/thread/notifications</code></td></tr>
+    <tr><td>Count unread thread comments</td><td><span class="http get">GET</span><code>/api/website/college/course/forums/unread-count</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="certificates">4.10 Certificates &amp; terms</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Accept T&amp;Cs (signed)</td><td><span class="http post">POST</span><code>/api/terms/accept</code></td></tr>
+    <tr><td>Get current T&amp;Cs text</td><td><span class="http get">GET</span><code>/api/terms?current_college_id=…</code></td></tr>
+    <tr><td>Sample certificate PDF (template preview)</td><td><span class="http get">GET</span><code>/user/certificate.pdf</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="offline-calendar">4.11 Offline calendar (live classes)</h3>
+<p>Lets you create scheduled events that can be tied to a Zoom meeting.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Month view for college</td><td><span class="http get">GET</span><code>/api/offline-calendar/events?current_college_id=…&amp;year=…&amp;month=…</code></td></tr>
+    <tr><td>My events</td><td><span class="http get">GET</span><code>/api/offline-calendar/my-events?current_college_id=…&amp;year=…&amp;month=…</code></td></tr>
+    <tr><td>Single event</td><td><span class="http get">GET</span><code>/api/offline-calendar/events/{event}</code></td></tr>
+    <tr><td>Zoom meeting info for an event</td><td><span class="http get">GET</span><code>/api/offline-calendar/events/zoom-data/{eventId}</code></td></tr>
+    <tr><td>Create event (optionally auto-create Zoom meeting)</td><td><span class="http post">POST</span><code>/api/offline-calendar/events</code></td></tr>
+    <tr><td>Update event</td><td><span class="http put">PUT</span><code>/api/offline-calendar/events/{event}</code></td></tr>
+    <tr><td>Delete event</td><td><span class="http delete">DELETE</span><code>/api/offline-calendar/events/{event}</code></td></tr>
+    <tr><td>Schedulable items for a course</td><td><span class="http get">GET</span><code>/api/offline-calendar/course-items?course_id=…&amp;current_college_id=…</code></td></tr>
+    <tr><td>Detect conflicts</td><td><span class="http get">GET</span><code>/api/offline-calendar/course-events-in-the-same-time</code></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Example — create event:</strong></p>
+<pre><code class="language-http">POST /api/offline-calendar/events
+Authorization: Bearer &lt;token&gt;
+Content-Type: application/json
+
+{
+  "title":              "Weekly lecture #3",
+  "description":        "Trigonometry intro",
+  "current_college_id": 40,
+  "course_id":          128,
+  "item_id":            5421,
+  "event_date":         "2026-05-01",
+  "event_time_start":   "09:00",
+  "event_time_end":     "10:30",
+  "color":              "#3B82F6",
+  "teacher_email":      "teacher@school.co.il",
+  "create_zoom_event":  true
+}</code></pre>
+
+<h3 id="zoom">4.12 Zoom (standalone)</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Create Zoom meeting</td><td><span class="http post">POST</span><code>/api/zoom/events</code></td></tr>
+    <tr><td>Meeting details</td><td><span class="http get">GET</span><code>/api/zoom/events/{eventId}</code></td></tr>
+    <tr><td>Delete meeting</td><td><span class="http delete">DELETE</span><code>/api/zoom/events/{eventId}</code></td></tr>
+    <tr><td>Get host join link</td><td><span class="http post">POST</span><code>/api/zoom/events/{eventId}/admin-link</code></td></tr>
+    <tr><td>Get participant join link</td><td><span class="http post">POST</span><code>/api/zoom/events/{eventId}/student-link</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="s2s">4.13 Server-to-server integration (College JWT)</h3>
+<p>These endpoints are designed for your backend to call Yeda's backend. Use the <strong>College JWT</strong> from <a href="#college-jwt">§2.2</a>.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Grant a user access to a course</td><td><span class="http post">POST</span><code>/api/colleges/{college}/openAccessToCourse</code></td></tr>
+    <tr><td>Grant a user access to a bundle</td><td><span class="http post">POST</span><code>/api/colleges/{college}/openAccessToBundle</code></td></tr>
+    <tr><td>Grant access to either (auto-detect)</td><td><span class="http post">POST</span><code>/api/colleges/{college}/openAccessToCourseOrBundle</code></td></tr>
+    <tr><td>Revoke <strong>ALL</strong> access for a user</td><td><span class="http post">POST</span><code>/api/colleges/{college}/closeAccessToAllUserCoursesAndBundles</code></td></tr>
+    <tr><td>Change a user's password</td><td><span class="http post">POST</span><code>/api/colleges/{college}/users/change-password</code></td></tr>
+    <tr><td>Send a password reset email</td><td><span class="http post">POST</span><code>/api/colleges/{college}/users/reset-password</code></td></tr>
+    <tr><td>Per-course statistics for a user</td><td><span class="http get">GET</span><code>/api/colleges/{college}/users/course-statistics?user_id=…&amp;course_id=…</code></td></tr>
+    <tr><td>Profile-wide statistics for a user</td><td><span class="http get">GET</span><code>/api/colleges/{college}/users/profile-statistics?user_id=…&amp;from=…&amp;to=…</code></td></tr>
+    <tr><td>Sync users from your IdP (Microsoft / Okta)</td><td><span class="http post">POST</span><code>/api/colleges/{college}/directory-sync/users/sync</code></td></tr>
+    <tr><td>Post a course announcement on behalf of the college</td><td><span class="http post">POST</span><code>/api/colleges/{college}/courses/messages</code></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Example — grant course access by email:</strong></p>
+<pre><code class="language-bash">curl -s -X POST "https://your-college.yeda.ai/api/colleges/40/openAccessToCourse" \
+  -H "Authorization: Bearer $COLLEGE_JWT" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "course_id":      128,
+    "user_email":     "buyer@example.com",
+    "user_name":      "New Buyer",
+    "user_birthdate": "1995-07-12"
+  }'</code></pre>
+<p>If the user does not yet exist, Yeda will create it and send a welcome email.</p>
+
+<h3 id="yedalabs">4.14 YedaLabs partner integration</h3>
+<p>If you run the YedaLabs video platform, these endpoints let you sync videos and completion data. Authenticated with the <strong>YedaLabs token</strong>.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>List colleges on Yeda</td><td><span class="http get">GET</span><code>/api/yedalabs/colleges</code></td></tr>
+    <tr><td>List courses</td><td><span class="http get">GET</span><code>/api/yedalabs/colleges/courses</code></td></tr>
+    <tr><td>List videos per course</td><td><span class="http get">GET</span><code>/api/yedalabs/colleges/courses/videos</code></td></tr>
+    <tr><td>Update a course (patch)</td><td><span class="http patch">PATCH</span><code>/api/yedalabs/colleges/courses</code></td></tr>
+    <tr><td>Post completion statistics</td><td><span class="http post">POST</span><code>/api/yedalabs/course-completion-statistics</code></td></tr>
+    <tr><td>Update the Yeda ↔ YedaLabs video-id mapping</td><td><span class="http post">POST</span><code>/api/yedalabs/update-video-id</code></td></tr>
+  </tbody>
+</table>
+<p>Helper endpoints for migrating video sources:</p>
+<ul>
+  <li><span class="http post">POST</span><code>/api/video-migrate/get-vimeo-download-link</code></li>
+  <li><span class="http post">POST</span><code>/api/video-migrate/get-yedalabs-link</code></li>
+</ul>
+
+<h3 id="vimeo">4.15 Vimeo integration</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>OAuth callback (called by Vimeo after the user authorises your app)</td><td><span class="http get">GET</span><code>/api/vimeo/auth-callback</code></td></tr>
+    <tr><td>Upload a video to Vimeo (admin token required)</td><td><span class="http post">POST</span><code>/api/vimeo/upload</code> — multipart <code>video=@file.mp4</code></td></tr>
+    <tr><td>Delete a Vimeo video (admin token required)</td><td><span class="http delete">DELETE</span><code>/api/vimeo/{vimeoId}</code></td></tr>
+    <tr><td>Update the cached duration of a video</td><td><span class="http post">POST</span><code>/api/lessons/update-video-length</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="white-label">4.16 White-label embed</h3>
+<p>Trimmed "student-only" API for embedding Yeda into a partner site, scoped to a single college. Base prefix: <code>/api/wl/colleges/{college}</code>.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>List courses</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses</code></td></tr>
+    <tr><td>Courses for homepage</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses-main-page</code></td></tr>
+    <tr><td>Course categories</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses/categories</code></td></tr>
+    <tr><td>One course (authenticated)</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses/{coursePointer}</code></td></tr>
+    <tr><td>Lightweight course payload</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses/{coursePointer}/light</code></td></tr>
+    <tr><td>Has access?</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/courses/{coursePointer}/has-access</code></td></tr>
+    <tr><td>List bundles</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/bundles</code></td></tr>
+    <tr><td>Single bundle</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/bundle/{slug}</code></td></tr>
+    <tr><td>Download bundle file</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/bundle/files/download/{id}</code></td></tr>
+    <tr><td>Forum threads</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/forum/threads</code></td></tr>
+    <tr><td>Public user profile</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/users/{username}</code></td></tr>
+    <tr><td>Public user's courses</td><td><span class="http get">GET</span><code>/api/wl/colleges/{college}/users/{username}/courses</code></td></tr>
+    <tr><td>White-label enroll from course page</td><td><span class="http post">POST</span><code>/api/courses/{course}/enroll</code></td></tr>
+  </tbody>
+</table>
+<p>Self-service "me" endpoints (user token required):</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Me</td><td><span class="http get">GET</span><code>/api/wl/me</code> · <span class="http put">PUT</span><code>/api/wl/me</code></td></tr>
+    <tr><td>Change email</td><td><span class="http put">PUT</span><code>/api/wl/me/change-email</code></td></tr>
+    <tr><td>My courses / threads</td><td><span class="http get">GET</span><code>/api/wl/me/courses</code> · <code>/api/wl/me/threads</code></td></tr>
+    <tr><td>Reset password</td><td><span class="http put">PUT</span><code>/api/wl/me/reset-password</code></td></tr>
+    <tr><td>Privacy settings</td><td><span class="http get">GET</span><code>/api/wl/me/privacy</code> · <span class="http put">PUT</span><code>/api/wl/me/privacy</code></td></tr>
+    <tr><td>Upload / delete my image / files</td><td><span class="http post">POST</span><code>/api/wl/me/image</code> · <span class="http post">POST</span><code>/api/wl/me/files</code> · <span class="http delete">DELETE</span><code>/api/wl/me/files</code></td></tr>
+    <tr><td>Check user document</td><td><span class="http post">POST</span><code>/api/wl/me/checkUserDocument</code> · <span class="http get">GET</span><code>/api/wl/me/isDocumentChecked</code></td></tr>
+    <tr><td>Unread messages</td><td><span class="http get">GET</span><code>/api/wl/messages/unread</code></td></tr>
+    <tr><td>Editor image upload (for forum posts)</td><td><span class="http post">POST</span><code>/api/wl/editor/file</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="translations">4.17 Translations (i18n)</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Full i18n dictionary</td><td><span class="http get">GET</span><code>/api/all-translations</code></td></tr>
+    <tr><td>Single key</td><td><span class="http get">GET</span><code>/api/translations/getByKey/{key}</code></td></tr>
+    <tr><td>Batch lookup</td><td><span class="http get">GET</span><code>/api/combined-translations?keys[]=…</code></td></tr>
+    <tr><td>Available languages</td><td><span class="http get">GET</span><code>/api/available-languages</code></td></tr>
+  </tbody>
+</table>
+
+<h3 id="utility">4.18 Utility</h3>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Generate / validate a slug</td><td><span class="http post">POST</span><code>/api/slug/generate</code> · <code>/api/slug/validate</code></td></tr>
+    <tr><td>Resolve domain → <code>college_id</code></td><td><span class="http get">GET</span><code>/api/colleges/getCollegeIdByDomain?domain=…</code></td></tr>
+    <tr><td>Check if a username is unique</td><td><span class="http get">GET</span><code>/api/website/is-unique/username?username=…&amp;college_id=…</code></td></tr>
+    <tr><td>Check if an email is unique</td><td><span class="http get">GET</span><code>/api/website/is-unique/email?email=…&amp;college_id=…</code></td></tr>
+    <tr><td>Generic file download by id</td><td><span class="http get">GET</span><code>/api/files/{file}/download</code></td></tr>
+    <tr><td>Report a frontend error to our team</td><td><span class="http post">POST</span><code>/api/telegram-error-log</code></td></tr>
+  </tbody>
+</table>
+
+<!-- ══ 5. RECIPES ══ -->
+<h2 id="recipes">5. Integration recipes</h2>
+
+<h3 id="recipe-1">5.1 Log the user in and fetch their profile</h3>
+<pre><code class="language-bash">TOKEN=$(curl -s https://your-college.yeda.ai/api/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "fieldname":  "email",
+    "username":   "student@example.com",
+    "password":   "s3cret",
+    "college_id": 40
+  }' | jq -r '.auth.access_token')
+
+curl -s https://your-college.yeda.ai/api/current-user \
+  -H "Authorization: Bearer $TOKEN"</code></pre>
+
+<h3 id="recipe-2">5.2 Sell a course from your own landing page</h3>
+<pre><code class="language-bash"># Your marketing site posts the buyer's email; Yeda creates the account if missing
+curl -s -X POST https://your-college.yeda.ai/api/lp/payments/courses/128 \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"buyer@example.com","college_id":40}'</code></pre>
+<p>The response contains the next step (redirect to hosted payment, or confirmation for zero-price orders).</p>
+
+<h3 id="recipe-3">5.3 Grant access to a course / bundle from your back-office</h3>
+<pre><code class="language-bash"># 1. One-time: obtain a College JWT
+JWT=$(curl -s -X POST https://your-college.yeda.ai/api/auth/colleges/40/jwt/byAdmin \
+  -H 'Content-Type: application/json' \
+  -d '{"login":"admin@your-college.co.il","password":"…"}' | jq -r '.token')
+
+# 2. Any time afterwards: grant access
+curl -s -X POST "https://your-college.yeda.ai/api/colleges/40/openAccessToCourse" \
+  -H "Authorization: Bearer $JWT" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "course_id":      128,
+    "user_email":     "buyer@example.com",
+    "user_name":      "Buyer Name",
+    "user_birthdate": "1995-07-12"
+  }'</code></pre>
+
+<h3 id="recipe-4">5.4 Schedule a live class with Zoom</h3>
+<pre><code class="language-bash">curl -s -X POST https://your-college.yeda.ai/api/offline-calendar/events \
+  -H "Authorization: Bearer $TOKEN" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "title":              "Weekly lecture #3",
+    "current_college_id": 40,
+    "course_id":          128,
+    "item_id":            5421,
+    "event_date":         "2026-05-01",
+    "event_time_start":   "09:00",
+    "event_time_end":     "10:30",
+    "create_zoom_event":  true
+  }'</code></pre>
+
+<h3 id="recipe-5">5.5 Upload a video to Vimeo</h3>
+<pre><code class="language-bash">curl -s -X POST https://your-college.yeda.ai/api/vimeo/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -F 'video=@/path/to/lesson.mp4' \
+  -F 'name=Introduction to Trig'</code></pre>
+
+<h3 id="recipe-6">5.6 Sync users from your corporate directory</h3>
+<pre><code class="language-bash">curl -s -X POST "https://your-college.yeda.ai/api/colleges/40/directory-sync/users/sync" \
+  -H "Authorization: Bearer $COLLEGE_JWT" \
+  -H 'Content-Type: application/json' \
+  -d '{ "users": [ { "external_id": "…", "email": "…", "name": "…", "groups": [ "…" ] } ] }'</code></pre>
+
+<h3 id="recipe-7">5.7 Fetch a user's progress in a course</h3>
+<pre><code class="language-bash">curl -s "https://your-college.yeda.ai/api/colleges/40/users/course-statistics?user_id=12345&amp;course_id=128" \
+  -H "Authorization: Bearer $COLLEGE_JWT"</code></pre>
+<p>Returns a structure with seconds watched, percentage completed, average exam grade, etc.</p>
+
+<!-- ══ 6. WEBHOOKS ══ -->
+<h2 id="webhooks">6. Webhooks you need to handle</h2>
+
+<h3 id="wh-tranzila">6.1 Payment notifications (Tranzila)</h3>
+<p>Your Yeda instance exposes an <strong>inbound</strong> webhook URL that Tranzila calls after each successful or failed payment:</p>
+<pre><code class="language-http">POST https://your-college.yeda.ai/api/payment-page/tranzila-notify/{orderId}</code></pre>
+<p>Configure this URL in your Tranzila dashboard. Yeda handles signature validation automatically; you do not need to re-validate it.</p>
+<p>Return <code>200 OK</code> with body <code>OK</code>. No custom payload parsing is required on your side — Yeda updates the order, dispatches notification jobs, and exposes the result via <code>GET /api/payment-page/check-payment-status?order_id=…</code>.</p>
+<p>Similar flows exist for:</p>
+<pre><code class="language-http">ANY /api/payments/callback/{payment_system}
+ANY /api/payments/purchase/{payment_system}/success
+ANY /api/payments/purchase/{payment_system}/fail</code></pre>
+
+<h3 id="wh-enrollment">6.2 Enrollment approval (signed URLs)</h3>
+<p>When a manual-approval enrollment is created, Yeda sends your chosen admin an email with two links:</p>
+<pre><code class="language-http">GET /api/wl/enrollments/approve/{token}
+GET /api/wl/enrollments/decline/{token}</code></pre>
+<p>Both are public and single-use — the token is signed and expires. Open them in a browser or call them server-side to approve / decline.</p>
+
+<h3 id="wh-others">6.3 Stripe / Cardcom / Multipass / Alljobs</h3>
+<p>When enabled for your college, Yeda can also:</p>
+<ul>
+  <li>Receive <strong>Stripe</strong> webhook events (signature verified with <code>config('services.stripe.webhook.secret')</code>).</li>
+  <li>Handle <strong>Multipass</strong> XML transaction responses.</li>
+  <li>Handle <strong>Alljobs</strong> coupon activations.</li>
+</ul>
+<p>Ask your account manager to configure the relevant secrets before you begin testing.</p>
+
+<!-- ══ 7. GLOSSARY ══ -->
+<h2 id="glossary">7. Glossary</h2>
+<table>
+  <thead><tr><th style="width:22%">Term</th><th>Meaning</th></tr></thead>
+  <tbody>
+    <tr><td><strong>College</strong></td><td>The tenant. Yeda serves many colleges; users belong to one (<code>college_id</code>) but may have a different "active" college (<code>current_college_id</code>).</td></tr>
+    <tr><td><strong>Course</strong></td><td>The top-level piece of content. Contains sections, which contain items (lessons, exams, practices, surveys, files).</td></tr>
+    <tr><td><strong>Bundle</strong></td><td>A collection of courses sold or granted together.</td></tr>
+    <tr><td><strong>Interactive lesson</strong></td><td>A SCORM / cmi5 / iSpring package uploaded as a ZIP.</td></tr>
+    <tr><td><strong>Section item</strong></td><td>Any leaf piece of content inside a course — a lesson, exam, practice, survey, etc.</td></tr>
+    <tr><td><strong>Questionnaire</strong></td><td>Underlying container that drives exams, practices and surveys.</td></tr>
+    <tr><td><strong>Access type</strong></td><td>A policy object describing how a user accesses a given course or bundle (bought, assigned, coupon-redeemed, branch-granted).</td></tr>
+    <tr><td><strong>Branch</strong></td><td>Organisational grouping inside a college — used for access overrides.</td></tr>
+    <tr><td><strong>White-label</strong></td><td>An embeddable, college-scoped, trimmed subset of the student API under <code>/api/wl/*</code>.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="help">Need help?</h2>
+<p>Reach out to your Yeda account manager with:</p>
+<ol>
+  <li>The exact <strong>endpoint</strong> and <strong>HTTP method</strong> you're calling.</li>
+  <li>A sample request (headers + body) — mask any tokens.</li>
+  <li>The full response (status, headers, body).</li>
+</ol>
+<p>Most questions get answered in a day or two.</p>
+
+</main>
+</div>
+
+<footer>
+  <p><b>Yeda Integration Team</b> · <a href="https://yeda.ai">yeda.ai</a> · Client Integration Guide v1.0 · 2026-04-20</p>
+</footer>
+
+<button class="top-btn" id="topBtn" aria-label="Back to top">↑</button>
+
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-bash.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-http.min.js"></script>
+<script>
+// Active TOC highlight
+const links = document.querySelectorAll('.sidebar a[href^="#"]');
+const targets = [...links].map(a => document.getElementById(a.getAttribute('href').slice(1))).filter(Boolean);
+const map = new Map(targets.map((el, i) => [el, links[i]]));
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(a => a.classList.remove('active'));
+      const a = map.get(e.target);
+      if (a) a.classList.add('active');
+    }
+  });
+}, { rootMargin: '-80px 0px -70% 0px', threshold: 0 });
+targets.forEach(t => io.observe(t));
+
+// Back to top
+const btn = document.getElementById('topBtn');
+window.addEventListener('scroll', () => {
+  btn.classList.toggle('v', window.scrollY > 400);
+});
+btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+</script>
+</body>
+</html>
