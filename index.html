@@ -56,6 +56,100 @@ body{
 .top-brand .label{font-size:.8rem;font-weight:600;color:var(--text-mid);letter-spacing:.02em}
 .top-meta{font-size:.78rem;color:var(--text-light);font-weight:500}
 
+/* Search */
+.top-right{display:flex;align-items:center;gap:14px}
+.search-btn{
+  width:34px;height:34px;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--blue-bg);
+  border:1px solid var(--border);
+  border-radius:50%;
+  color:var(--navy);
+  cursor:pointer;
+  transition:.2s var(--ease);
+  padding:0;
+}
+.search-btn:hover{background:var(--blue-soft);border-color:var(--blue-soft)}
+.search-btn svg{width:16px;height:16px}
+.search-btn kbd{
+  display:none;
+  margin-left:6px;
+  padding:1px 5px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:.68rem;
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:4px;
+  color:var(--text-light);
+}
+@media(min-width:720px){
+  .search-btn{width:auto;height:34px;padding:0 12px;border-radius:18px;gap:6px}
+  .search-btn kbd{display:inline-flex;align-items:center}
+}
+
+/* Search panel */
+.search-panel{
+  position:fixed;top:0;left:0;right:0;z-index:200;
+  background:rgba(255,255,255,.98);
+  backdrop-filter:blur(24px) saturate(180%);
+  border-bottom:1px solid var(--border);
+  padding:14px 24px;
+  display:none;
+  align-items:center;
+  gap:14px;
+  box-shadow:0 8px 24px rgba(0,15,97,.06);
+}
+.search-panel.open{display:flex}
+.search-panel svg.ic{width:18px;height:18px;color:var(--navy);flex-shrink:0}
+.search-panel input{
+  flex:1;min-width:0;
+  border:none;outline:none;background:none;
+  font-family:inherit;font-size:1rem;
+  color:var(--text);
+  padding:6px 0;
+}
+.search-panel input::placeholder{color:var(--text-light)}
+.search-panel .count{
+  font-size:.82rem;color:var(--text-light);
+  font-family:'JetBrains Mono',monospace;
+  white-space:nowrap;
+}
+.search-panel .nav-btn{
+  width:30px;height:30px;
+  display:flex;align-items:center;justify-content:center;
+  background:none;border:1px solid var(--border);
+  border-radius:6px;cursor:pointer;
+  color:var(--text-mid);
+  transition:.15s;
+  padding:0;
+}
+.search-panel .nav-btn:hover:not(:disabled){background:var(--blue-bg);color:var(--navy);border-color:var(--blue-soft)}
+.search-panel .nav-btn:disabled{opacity:.35;cursor:not-allowed}
+.search-panel .nav-btn svg{width:14px;height:14px}
+.search-panel .close-btn{
+  width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  background:none;border:none;cursor:pointer;color:var(--text-light);
+  font-size:20px;line-height:1;padding:0;
+  transition:.15s;
+}
+.search-panel .close-btn:hover{color:var(--navy)}
+
+/* Search highlights */
+mark.search-hit{
+  background:#FFF3C4;color:var(--text);
+  padding:1px 2px;border-radius:3px;
+  transition:.2s;
+}
+mark.search-hit.current{
+  background:#F5A623;color:#fff;
+  box-shadow:0 0 0 3px rgba(245,166,35,.25);
+}
+
+@media(max-width:560px){
+  .search-panel{padding:10px 14px;gap:8px}
+  .search-panel .count{font-size:.72rem}
+}
+
 /* Layout */
 .wrap{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1200px;margin:0 auto;gap:40px;padding:0 24px}
 @media(max-width:980px){
@@ -349,8 +443,27 @@ footer a{color:var(--blue);text-decoration:none}
     <span class="sep"></span>
     <span class="label">Client Integration Guide</span>
   </a>
-  <span class="top-meta">v1.0 · 2026-04-20</span>
+  <div class="top-right">
+    <button class="search-btn" id="searchBtn" aria-label="Search" title="Search (⌘K)">
+      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="m18 18-4.5-4.5"/></svg>
+      <kbd>⌘K</kbd>
+    </button>
+    <span class="top-meta">v1.0 · 2026-04-20</span>
+  </div>
 </header>
+
+<div class="search-panel" id="searchPanel" role="search">
+  <svg class="ic" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="9" r="6"/><path d="m18 18-4.5-4.5"/></svg>
+  <input type="search" id="searchInput" placeholder="Search for words or phrases… (Esc to close)" autocomplete="off" spellcheck="false">
+  <span class="count" id="searchCount"></span>
+  <button class="nav-btn" id="searchPrev" aria-label="Previous match" title="Previous (Shift+Enter)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m10 12-4-4 4-4"/></svg>
+  </button>
+  <button class="nav-btn" id="searchNext" aria-label="Next match" title="Next (Enter)">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 4 4 4-4 4"/></svg>
+  </button>
+  <button class="close-btn" id="searchClose" aria-label="Close search" title="Close (Esc)">×</button>
+</div>
 
 <div class="wrap" id="top">
 
@@ -1173,6 +1286,136 @@ window.addEventListener('scroll', () => {
   btn.classList.toggle('v', window.scrollY > 400);
 });
 btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ─────────── SEARCH ───────────
+const searchBtn = document.getElementById('searchBtn');
+const searchPanel = document.getElementById('searchPanel');
+const searchInput = document.getElementById('searchInput');
+const searchCount = document.getElementById('searchCount');
+const searchPrev = document.getElementById('searchPrev');
+const searchNext = document.getElementById('searchNext');
+const searchClose = document.getElementById('searchClose');
+const mainEl = document.querySelector('main');
+
+let hits = [];
+let currentHit = -1;
+
+function clearHighlights() {
+  mainEl.querySelectorAll('mark.search-hit').forEach(m => {
+    const txt = document.createTextNode(m.textContent);
+    m.parentNode.replaceChild(txt, m);
+  });
+  mainEl.normalize();
+  hits = [];
+  currentHit = -1;
+  updateCount();
+}
+
+function updateCount() {
+  if (!searchInput.value.trim()) { searchCount.textContent = ''; }
+  else if (hits.length === 0) { searchCount.textContent = 'No matches'; }
+  else { searchCount.textContent = `${currentHit + 1} / ${hits.length}`; }
+  searchPrev.disabled = hits.length < 2;
+  searchNext.disabled = hits.length < 2;
+}
+
+function highlight(q) {
+  clearHighlights();
+  if (!q || q.length < 2) { updateCount(); return; }
+  const re = new RegExp(q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+  const walker = document.createTreeWalker(mainEl, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      // Skip text inside mark (already highlighted) or script/style
+      if (!node.nodeValue.trim()) return NodeFilter.FILTER_REJECT;
+      let p = node.parentElement;
+      while (p && p !== mainEl) {
+        const t = p.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'MARK') return NodeFilter.FILTER_REJECT;
+        p = p.parentElement;
+      }
+      return re.test(node.nodeValue) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT;
+    }
+  });
+  const nodes = [];
+  let n; while ((n = walker.nextNode())) nodes.push(n);
+
+  nodes.forEach(node => {
+    const text = node.nodeValue;
+    re.lastIndex = 0;
+    const frag = document.createDocumentFragment();
+    let lastIdx = 0, m;
+    while ((m = re.exec(text))) {
+      if (m.index > lastIdx) frag.appendChild(document.createTextNode(text.slice(lastIdx, m.index)));
+      const mark = document.createElement('mark');
+      mark.className = 'search-hit';
+      mark.textContent = m[0];
+      frag.appendChild(mark);
+      hits.push(mark);
+      lastIdx = m.index + m[0].length;
+      if (m[0].length === 0) re.lastIndex++;
+    }
+    if (lastIdx < text.length) frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+    node.parentNode.replaceChild(frag, node);
+  });
+
+  if (hits.length) { currentHit = 0; focusHit(); }
+  updateCount();
+}
+
+function focusHit() {
+  hits.forEach(h => h.classList.remove('current'));
+  if (currentHit >= 0 && hits[currentHit]) {
+    hits[currentHit].classList.add('current');
+    hits[currentHit].scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function nextHit(delta) {
+  if (!hits.length) return;
+  currentHit = (currentHit + delta + hits.length) % hits.length;
+  focusHit();
+  updateCount();
+}
+
+function openSearch() {
+  searchPanel.classList.add('open');
+  searchInput.focus();
+  searchInput.select();
+}
+
+function closeSearch() {
+  searchPanel.classList.remove('open');
+  clearHighlights();
+  searchInput.value = '';
+}
+
+searchBtn.addEventListener('click', openSearch);
+searchClose.addEventListener('click', closeSearch);
+searchPrev.addEventListener('click', () => nextHit(-1));
+searchNext.addEventListener('click', () => nextHit(1));
+
+let searchTimer;
+searchInput.addEventListener('input', () => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => highlight(searchInput.value.trim()), 150);
+});
+
+searchInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') { e.preventDefault(); nextHit(e.shiftKey ? -1 : 1); }
+  else if (e.key === 'Escape') { e.preventDefault(); closeSearch(); }
+});
+
+window.addEventListener('keydown', e => {
+  // Cmd/Ctrl + K opens search
+  if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+    e.preventDefault();
+    openSearch();
+  }
+  // Escape closes (if open)
+  if (e.key === 'Escape' && searchPanel.classList.contains('open')) {
+    closeSearch();
+  }
+});
 </script>
 </body>
 </html>
