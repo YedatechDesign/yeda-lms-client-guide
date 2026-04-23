@@ -27,7 +27,7 @@
   --rs:8px;
   --ease:cubic-bezier(.25,.46,.45,.94);
 }
-html{scroll-behavior:smooth;font-size:16px}
+html{scroll-behavior:smooth;font-size:16px;overflow-x:hidden}
 body{
   font-family:'Rubik',-apple-system,BlinkMacSystemFont,sans-serif;
   background:#fff;
@@ -35,6 +35,8 @@ body{
   line-height:1.65;
   -webkit-font-smoothing:antialiased;
   -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  max-width:100vw;
 }
 
 /* Top bar */
@@ -53,10 +55,17 @@ body{
 .top-meta{font-size:.78rem;color:var(--text-light);font-weight:500}
 
 /* Layout */
-.wrap{display:grid;grid-template-columns:280px 1fr;max-width:1280px;margin:0 auto;gap:48px;padding:0 32px}
-@media(max-width:900px){
-  .wrap{grid-template-columns:1fr;padding:0 20px;gap:20px}
+.wrap{display:grid;grid-template-columns:260px minmax(0,1fr);max-width:1200px;margin:0 auto;gap:40px;padding:0 24px}
+@media(max-width:980px){
+  .wrap{grid-template-columns:1fr;padding:0 18px;gap:20px}
   .sidebar{display:none}
+  .top{padding:12px 18px}
+}
+@media(max-width:560px){
+  .wrap{padding:0 14px}
+  .top{padding:10px 14px}
+  .top-brand .label{display:none}
+  .top-meta{font-size:.72rem}
 }
 
 /* Sidebar TOC */
@@ -98,7 +107,8 @@ body{
 .sidebar .lvl-4{padding-left:36px;font-size:.78rem;color:var(--text-light)}
 
 /* Main content */
-main{padding:40px 0 80px;min-width:0}
+main{padding:40px 0 80px;min-width:0;max-width:100%;overflow-wrap:break-word}
+main>*{min-width:0}
 .hero{padding:30px 0 50px;border-bottom:1px solid var(--border);margin-bottom:50px}
 .hero h1{
   font-size:clamp(2rem,4.2vw,2.8rem);
@@ -178,12 +188,14 @@ main strong{color:var(--navy);font-weight:700}
 /* Tables */
 main table{
   width:100%;
+  max-width:100%;
   border-collapse:collapse;
   margin:18px 0 24px;
   font-size:.88rem;
   border:1px solid var(--border);
   border-radius:var(--rs);
   overflow:hidden;
+  table-layout:fixed;
 }
 main thead th{
   background:var(--blue-bg);
@@ -193,12 +205,16 @@ main thead th{
   text-align:left;
   border-bottom:1px solid var(--border);
   font-size:.82rem;
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 main tbody td{
   padding:11px 14px;
   border-bottom:1px solid var(--border);
   vertical-align:top;
   color:var(--text);
+  word-break:break-word;
+  overflow-wrap:anywhere;
 }
 main tbody tr:last-child td{border-bottom:none}
 main tbody tr:hover td{background:#FAFCFF}
@@ -223,6 +239,7 @@ main pre{
   border-radius:var(--rs);
   padding:18px 20px;
   overflow-x:auto;
+  max-width:100%;
   font-size:.85rem;
   line-height:1.6;
   margin:14px 0 24px;
@@ -235,6 +252,22 @@ main pre code{
   font-weight:400;
   color:var(--text);
   font-size:inherit;
+  white-space:pre;
+}
+
+/* Mobile: shrink a bit more */
+@media(max-width:560px){
+  main h1,.hero h1{font-size:1.7rem}
+  main h2{font-size:1.35rem;margin:48px 0 16px;padding-top:20px}
+  main h3{font-size:1.08rem;margin:30px 0 12px}
+  main h4{font-size:.94rem}
+  main p,main li{font-size:.92rem}
+  main pre{font-size:.78rem;padding:14px}
+  main table{font-size:.8rem}
+  main thead th,main tbody td{padding:9px 10px}
+  .hero{padding:20px 0 30px;margin-bottom:30px}
+  .intro-block{padding:20px;margin-bottom:30px}
+  main{padding:24px 0 60px}
 }
 
 /* HTTP method chip */
