@@ -410,8 +410,8 @@ footer a{color:var(--blue);text-decoration:none}
     <tr><td><strong>Base API URL</strong> for your college</td><td>All requests (<code>https://&lt;college-domain&gt;/api</code>)</td></tr>
     <tr><td><strong><code>college_id</code> and <code>current_college_id</code></strong></td><td>Every login / registration call</td></tr>
     <tr><td><strong>Admin or super-admin username + password</strong> <em>(for server-to-server integrations only)</em></td><td>Admin-authenticated flows and College JWT issuance</td></tr>
-    <tr><td><strong>Terminal / merchant configuration</strong> <em>(optional — if you process payments)</em></td><td>Tranzila or Cardcom integration</td></tr>
-    <tr><td><strong>Vimeo OAuth credentials</strong> <em>(optional — for custom video hosting)</em></td><td>Vimeo integration</td></tr>
+    <tr><td><strong>Terminal / merchant configuration</strong> (if you process payments) <em>(Optional)</em></td><td>Tranzila or Cardcom integration</td></tr>
+    <tr><td><strong>Vimeo OAuth credentials</strong> (if you want custom video hosting) <em>(Optional)</em></td><td>Vimeo integration</td></tr>
   </tbody>
 </table>
 
@@ -514,10 +514,10 @@ POST /api/website/auth/reset     # complete reset
 #   body: token, email, college_id, password, password_confirmation</code></pre>
 
 <h4>Verify email / phone</h4>
+<p>After registration, Yeda may require verification before allowing further actions.</p>
 <div class="callout warn">
-  <p><strong>⚠ All four endpoints below require a valid user access token</strong> (<code>Authorization: Bearer &lt;access_token&gt;</code> — i.e. the <code>auth:api</code> middleware). The user must already be logged in.</p>
+  <p><strong>⚠ Important:</strong> all four verification endpoints below require a valid user access token (<code>Authorization: Bearer &lt;access_token&gt;</code> — i.e. the <code>auth:api</code> middleware). The user must already be logged in.</p>
 </div>
-<p>After registration, Yeda may require verification before allowing further actions:</p>
 <pre><code class="language-http">POST /api/auth/email-verification/send-code
 POST /api/auth/email-verification/check-code   { "email_verification_code": 1234 }
 GET  /api/auth/user/send-sms-code
