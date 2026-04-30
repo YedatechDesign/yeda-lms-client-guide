@@ -530,6 +530,7 @@ footer a{color:var(--blue);text-decoration:none}
   <a href="#white-label" class="lvl-3">4.16 White-label</a>
   <a href="#translations" class="lvl-3">4.17 Translations</a>
   <a href="#utility" class="lvl-3">4.18 Utility</a>
+  <a href="#admin-app" class="lvl-3">4.19 Admin app API</a>
 
   <a href="#recipes" class="lvl-2">5. Integration recipes</a>
   <a href="#recipe-1" class="lvl-3">5.1 Log in & fetch user</a>
@@ -545,7 +546,8 @@ footer a{color:var(--blue);text-decoration:none}
   <a href="#wh-enrollment" class="lvl-3">6.2 Enrollment approval</a>
   <a href="#wh-others" class="lvl-3">6.3 Stripe / Cardcom / …</a>
 
-  <a href="#glossary" class="lvl-2">7. Glossary</a>
+  <a href="#remove-course-access" class="lvl-2">7. Remove course access</a>
+  <a href="#glossary" class="lvl-2">8. Glossary</a>
   <a href="#help" class="lvl-2">Need help?</a>
 </aside>
 
@@ -1144,6 +1146,15 @@ Content-Type: application/json
   </tbody>
 </table>
 
+<h3 id="admin-app">4.19 Admin app API (staff access token)</h3>
+<p>These routes correspond to actions in the Yeda admin back-office. Use a <strong>staff administrator</strong> Bearer access token — <em>not</em> the College JWT from <a href="#college-jwt">§2.2</a>.</p>
+<table>
+  <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
+  <tbody>
+    <tr><td>Remove a user's <strong>direct</strong> access to one course (access via bundles may remain)</td><td><span class="http delete">DELETE</span><code>/api/app/course/student-access</code> — <a href="#remove-course-access">full reference in §7</a></td></tr>
+  </tbody>
+</table>
+
 <!-- ══ 5. RECIPES ══ -->
 <h2 id="recipes">5. Integration recipes</h2>
 
@@ -1244,8 +1255,72 @@ GET /api/wl/enrollments/decline/{token}</code></pre>
 </ul>
 <p>Ask your account manager to configure the relevant secrets before you begin testing.</p>
 
-<!-- ══ 7. GLOSSARY ══ -->
-<h2 id="glossary">7. Glossary</h2>
+<!-- ══ 7. REMOVE COURSE ACCESS (ADMIN) ══ -->
+<h2 id="remove-course-access">7. Remove user access from a course (admin API)</h2>
+<p>This endpoint lets an administrator <strong>remove a user's direct access</strong> to a specific course. Only direct access is removed — if the user still has access through another source (for example a <a href="#glossary">bundle</a>), that access stays active.</p>
+
+<p><strong>Endpoint</strong></p>
+<p><span class="http delete">DELETE</span><code>/api/app/course/student-access</code></p>
+
+<p><strong>Headers</strong></p>
+<table>
+  <thead><tr><th>Header</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td><code>Authorization</code></td><td><code>Bearer {ADMIN_TOKEN}</code></td></tr>
+    <tr><td><code>Accept</code></td><td><code>application/json</code></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Parameters</strong> (sent as form body — see <code>curl</code> example)</p>
+<table>
+  <thead><tr><th>Parameter</th><th>Required</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>course_id</code></td><td>Yes</td><td>Id of the course to remove access from</td></tr>
+    <tr><td><code>user_id</code></td><td>Yes</td><td>Id of the user / student</td></tr>
+    <tr><td><code>current_college_id</code></td><td>Yes</td><td>Id of the college (tenant context)</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Example request</strong></p>
+<pre><code class="language-bash">curl -X DELETE "https://your-college.yeda.ai/api/app/course/student-access" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Accept: application/json" \
+  --data "course_id=123&amp;user_id=456&amp;current_college_id=424"</code></pre>
+
+<p><strong>Success response</strong> (no remaining access to the course):</p>
+<pre><code class="language-json">{
+  "success": true,
+  "message": "User access to the course was removed.",
+  "removed_direct_access": true,
+  "has_access": false,
+  "still_has_bundle_access": false
+}</code></pre>
+
+<p><strong>Success response</strong> (direct access removed; user still has access via another source, e.g. a bundle):</p>
+<pre><code class="language-json">{
+  "success": true,
+  "message": "Direct course access was removed. User still has access via another source.",
+  "removed_direct_access": true,
+  "has_access": true,
+  "still_has_bundle_access": true
+}</code></pre>
+
+<p><strong>Error response</strong> (example):</p>
+<pre><code class="language-json">{
+  "message": "Forbidden",
+  "status": 403
+}</code></pre>
+
+<div class="callout warn">
+  <p><strong>Authorization</strong> — Only users with permission to <strong>manage course users</strong> (admin / super-admin) may call this API. View-only or shared-access roles are not allowed.</p>
+</div>
+
+<div class="callout">
+  <p><strong>Important behaviour</strong> — This API removes only <em>direct</em> course access. If the user also has access through a bundle, the course may remain accessible; the response flags that with <code>has_access: true</code> and <code>still_has_bundle_access: true</code>.</p>
+</div>
+
+<!-- ══ 8. GLOSSARY ══ -->
+<h2 id="glossary">8. Glossary</h2>
 <table>
   <thead><tr><th style="width:22%">Term</th><th>Meaning</th></tr></thead>
   <tbody>
