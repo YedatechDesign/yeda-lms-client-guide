@@ -547,7 +547,9 @@ footer a{color:var(--blue);text-decoration:none}
   <a href="#wh-others" class="lvl-3">6.3 Stripe / Cardcom / …</a>
 
   <a href="#remove-course-access" class="lvl-2">7. Remove course access</a>
-  <a href="#glossary" class="lvl-2">8. Glossary</a>
+  <a href="#create-course-admin" class="lvl-2">8. Create a course</a>
+  <a href="#create-course-verify" class="lvl-3">8.1 How to verify</a>
+  <a href="#glossary" class="lvl-2">9. Glossary</a>
   <a href="#help" class="lvl-2">Need help?</a>
 </aside>
 
@@ -1147,11 +1149,12 @@ Content-Type: application/json
 </table>
 
 <h3 id="admin-app">4.19 Admin app API (staff access token)</h3>
-<p>These routes correspond to actions in the Yeda admin back-office. Use a <strong>staff administrator</strong> Bearer access token — <em>not</em> the College JWT from <a href="#college-jwt">§2.2</a>.</p>
+<p>These routes correspond to actions in the Yeda admin back-office. Use a <strong>staff administrator</strong> Bearer access token — <em>not</em> the College JWT from <a href="#college-jwt">§2.2</a>. Legacy admin routes live under <code>/api/app/…</code>; newer v2 admin routes use <code>/api/v2/admin/…</code>.</p>
 <table>
   <thead><tr><th style="width:48%">Outcome</th><th>Endpoint</th></tr></thead>
   <tbody>
     <tr><td>Remove a user's <strong>direct</strong> access to one course (access via bundles may remain)</td><td><span class="http delete">DELETE</span><code>/api/app/course/student-access</code> — <a href="#remove-course-access">full reference in §7</a></td></tr>
+    <tr><td>Create a course with lessons and Vimeo video links</td><td><span class="http post">POST</span><code>/api/v2/admin/courses</code> — <a href="#create-course-admin">full reference in §8</a></td></tr>
   </tbody>
 </table>
 
@@ -1319,8 +1322,134 @@ GET /api/wl/enrollments/decline/{token}</code></pre>
   <p><strong>Important behaviour</strong> — This API removes only <em>direct</em> course access. If the user also has access through a bundle, the course may remain accessible; the response flags that with <code>has_access: true</code> and <code>still_has_bundle_access: true</code>.</p>
 </div>
 
-<!-- ══ 8. GLOSSARY ══ -->
-<h2 id="glossary">8. Glossary</h2>
+<!-- ══ 8. CREATE COURSE (ADMIN) ══ -->
+<h2 id="create-course-admin">8. Create a course (admin API)</h2>
+<p>Create a new course — including one study unit, lessons, and video parts — from an external integration or admin tooling. College and owner context are taken from the authenticated admin user; you do not pass <code>college_id</code> in the body.</p>
+
+<p><strong>Endpoint</strong></p>
+<p><span class="http post">POST</span><code>/api/v2/admin/courses</code></p>
+
+<p><strong>Headers</strong></p>
+<table>
+  <thead><tr><th>Header</th><th>Value</th></tr></thead>
+  <tbody>
+    <tr><td><code>Authorization</code></td><td><code>Bearer {ADMIN_TOKEN}</code> — admin or super-admin only</td></tr>
+    <tr><td><code>Accept</code></td><td><code>application/json</code></td></tr>
+    <tr><td><code>Content-Type</code></td><td><code>application/json</code></td></tr>
+    <tr><td><code>Host</code></td><td><code>localhost</code> — optional; may be required when calling a local Docker stack or Postman against <code>http://localhost</code></td></tr>
+  </tbody>
+</table>
+
+<p><strong>Request body fields</strong></p>
+<table>
+  <thead><tr><th>Field</th><th>Required</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><code>name</code></td><td>Yes</td><td>Course title. String, max 191 characters.</td></tr>
+    <tr><td><code>status</code></td><td>No</td><td>Course status. Integer: <code>1</code>, <code>3</code>, or <code>4</code>. Default <code>1</code>.</td></tr>
+    <tr><td><code>access_type</code></td><td>No</td><td>Access policy. One of <code>free</code>, <code>enrolled</code>, <code>paid</code>, <code>closed_access</code>. Default <code>closed_access</code>.</td></tr>
+    <tr><td><code>short_descr</code></td><td>No</td><td>Short description for the course home page. Nullable string, max 191 characters.</td></tr>
+    <tr><td><code>descr</code></td><td>No</td><td>Main course description. Nullable string; HTML allowed.</td></tr>
+    <tr><td><code>visibility</code></td><td>No</td><td>Catalog visibility. <code>visible</code> or <code>hidden</code>. Default <code>visible</code>.</td></tr>
+    <tr><td><code>lessons</code></td><td>Yes</td><td>Array of lessons to create. Minimum 1 item.</td></tr>
+    <tr><td><code>lessons[].title</code></td><td>Yes</td><td>Lesson title. String, max 191 characters.</td></tr>
+    <tr><td><code>lessons[].video_links</code></td><td>Yes</td><td>Array of video URLs for the lesson. Minimum 1 item. Each URL must be valid, max 2048 characters. Vimeo URLs are parsed for a Vimeo id when possible.</td></tr>
+  </tbody>
+</table>
+
+<p><strong>Automatic behaviour</strong></p>
+<ul>
+  <li>Creates exactly <strong>one study unit</strong> and places all supplied lessons inside it.</li>
+  <li>Creates <strong>lesson video parts</strong> from each entry in <code>lessons[].video_links</code>.</li>
+  <li>Derives <strong>Vimeo ids</strong> from Vimeo URLs when possible.</li>
+  <li>Derives <strong>college</strong>, <strong>user</strong>, and internal ids from the authenticated admin context.</li>
+</ul>
+
+<p><strong>Not supported in v1</strong></p>
+<ul>
+  <li>Exams, questionnaires, and surveys</li>
+  <li>Interactive lessons (SCORM / cmi5 / iSpring)</li>
+  <li>Custom study-unit layout (only the single auto-created unit)</li>
+  <li>File attachments on lessons</li>
+</ul>
+
+<p><strong>Example — minimal valid request</strong> (required fields only):</p>
+<pre><code class="language-bash">curl -s -X POST "https://your-college.yeda.ai/api/v2/admin/courses" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Minimal API Course",
+    "lessons": [
+      {
+        "title": "Lesson 1",
+        "video_links": ["https://vimeo.com/123456789"]
+      }
+    ]
+  }'</code></pre>
+
+<p><strong>Example — full request</strong> (all supported fields):</p>
+<pre><code class="language-bash">curl -s -X POST "https://your-college.yeda.ai/api/v2/admin/courses" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "API Test Course",
+    "status": 1,
+    "access_type": "closed_access",
+    "short_descr": "Home page description test",
+    "descr": "&lt;p&gt;Main description test&lt;/p&gt;",
+    "visibility": "visible",
+    "lessons": [
+      {
+        "title": "API Lesson 1",
+        "video_links": [
+          "https://vimeo.com/123456789"
+        ]
+      }
+    ]
+  }'</code></pre>
+
+<p><strong>Example — validation error</strong> (<code>422</code>; see also <a href="#errors">§3.6</a>):</p>
+<pre><code class="language-json">{
+  "message": "The given data was invalid.",
+  "errors": {
+    "name": ["The name field is required."],
+    "lessons": ["The lessons field is required."],
+    "lessons.0.video_links": ["The lessons.0.video_links field is required."]
+  }
+}</code></pre>
+
+<p><strong>Example — local Docker / Postman</strong> (note the <code>Host</code> header):</p>
+<pre><code class="language-bash">curl -s -X POST "http://localhost/api/v2/admin/courses" \
+  -H "Host: localhost" \
+  -H "Authorization: Bearer YOUR_ADMIN_TOKEN" \
+  -H "Accept: application/json" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Docker Test Course",
+    "lessons": [
+      {
+        "title": "Local Lesson",
+        "video_links": ["https://vimeo.com/123456789"]
+      }
+    ]
+  }'</code></pre>
+
+<div class="callout warn">
+  <p><strong>Authorization</strong> — Admin or super-admin Bearer token only. View-only or shared-access roles cannot create courses.</p>
+</div>
+
+<h3 id="create-course-verify">8.1 How to verify</h3>
+<ol>
+  <li>Confirm the response includes the <strong>created course data</strong> and a course <strong>id</strong>.</li>
+  <li>Open the Yeda admin <strong>courses list</strong> and confirm the new course appears.</li>
+  <li>Open the course in admin and confirm exactly <strong>one study unit</strong> was created.</li>
+  <li>Confirm each submitted lesson exists and its <strong>video part(s)</strong> were created from <code>video_links</code>.</li>
+  <li>Send an intentionally invalid body (for example omit <code>name</code> or <code>lessons</code>) and confirm a <strong>validation error</strong> response (<code>422</code> with an <code>errors</code> map).</li>
+</ol>
+
+<!-- ══ 9. GLOSSARY ══ -->
+<h2 id="glossary">9. Glossary</h2>
 <table>
   <thead><tr><th style="width:22%">Term</th><th>Meaning</th></tr></thead>
   <tbody>
