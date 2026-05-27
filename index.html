@@ -69,8 +69,10 @@ body{
   padding:14px 32px;
   display:flex;align-items:center;justify-content:space-between;
 }
-.top-brand{display:flex;align-items:center;gap:12px;text-decoration:none}
-.top-brand img{height:28px;width:auto;display:block}
+.top-brand{display:flex;align-items:center;gap:12px;text-decoration:none;transition:opacity .2s ease}
+.top-brand:hover{opacity:.75}
+.top-brand img{height:28px;width:auto;display:block;transition:transform .2s ease}
+.top-brand:hover img{transform:scale(1.05)}
 .top-brand .sep{width:1px;height:20px;background:var(--border)}
 .top-brand .label{font-size:.8rem;font-weight:600;color:var(--text-mid);letter-spacing:.02em}
 .top-meta{font-size:.78rem;color:var(--text-light);font-weight:500}
@@ -457,7 +459,7 @@ footer a{color:var(--blue);text-decoration:none}
 <body>
 
 <header class="top">
-  <a class="top-brand" href="#top">
+  <a class="top-brand" href="https://yedalms.io">
     <img src="assets/yeda-logo-blue.png" alt="Yeda">
     <span class="sep"></span>
     <span class="label">Client Integration Guide</span>
